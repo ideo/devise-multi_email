@@ -33,7 +33,13 @@ module Devise
           multi_email_association.include_module(EmailAuthenticatable)
         end
 
-        delegate :skip_confirmation!, to: Devise::MultiEmail.primary_email_method_name, allow_nil: false
+        if Devise.activerecord51?
+          delegate :skip_confirmation!, :email_before_last_save, :saved_change_to_email?,
+                   to: Devise::MultiEmail.primary_email_method_name, allow_nil: false
+        else
+          delegate :skip_confirmation!, :email_was, :email_changed?,
+                   to: Devise::MultiEmail.primary_email_method_name, allow_nil: false
+        end
 
         # Gets the primary email address of the user.
         def email
